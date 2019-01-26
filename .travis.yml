@@ -1,0 +1,20 @@
+sudo: required
+services:
+  - docker 
+
+before_install:
+  - docker build -t julianijere/react-test -f ./client/Dockerfile.dev ./client
+
+script:
+  - docker run julianijere/react-test npm run test -- --coverage
+
+after_success:
+  - docker build -t julianijere/kliqr:client ./client
+  - docker build -t julianijere/kliqr:nginx ./nginx
+  - docker build -t julianijere/kliqr:server ./server
+  - docker build -t julianijere/kliqr:worker ./worker
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
+  - docker push julianijere/kliqr:client
+  - docker push julianijere/kliqr:ningx
+  - docker push julianijere/kliqr:server
+  - docker push julianijere/kliqr:worker
